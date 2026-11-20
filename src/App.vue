@@ -193,7 +193,7 @@ onUnmounted(() => {
           </a>
           <div class="mx-2 h-4 w-px bg-zinc-200" />
           <a
-            href="https://github.com/username"
+            href="https://github.com/mochherucahyono"
             target="_blank"
             rel="noopener noreferrer"
             class="inline-flex items-center gap-1.5 rounded-full bg-zinc-900 px-3.5 py-1.5 text-xs font-medium text-white transition-all hover:bg-zinc-800 active:scale-95"
