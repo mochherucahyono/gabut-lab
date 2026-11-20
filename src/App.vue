@@ -149,7 +149,7 @@ watch(activeGame, (game) => {
 
     <!-- Footer -->
     <footer class="border-t border-zinc-100 py-8 text-center text-xs text-zinc-500">
-      © 2026 GabutLab dibuat oleh Heru Cahyono.
+      © 2026 GabutLab. Dibuat oleh Heru Cahyono.
     </footer>
 
     <!-- Modal Detail -->
