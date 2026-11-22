@@ -69,7 +69,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown));
           class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-zinc-900 py-2.5 text-xs font-medium text-white transition-colors hover:bg-zinc-800"
         >
           <Play class="h-3.5 w-3.5 fill-current" />
-          Buka Demo
+          Mainkan
         </a>
         <a
           :href="game.repoUrl"

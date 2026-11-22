@@ -112,76 +112,90 @@ onUnmounted(() => {
       &copy; 2026 GabutLab. Dibuat oleh Heru Cahyono.
     </footer>
 
-    <!-- Mobile Drawer -->
+    <!-- Backdrop (fade halus) -->
     <Transition
-      enter-active-class="transition-opacity duration-200"
+      enter-active-class="transition-opacity duration-300 ease-out"
       enter-from-class="opacity-0"
       enter-to-class="opacity-100"
-      leave-active-class="transition-opacity duration-150"
+      leave-active-class="transition-opacity duration-200 ease-in"
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
       <div
         v-if="mobileMenuOpen"
-        @click.self="closeDrawer"
-        class="fixed inset-0 z-50 flex justify-end bg-zinc-900/40 backdrop-blur-xs md:hidden"
-      >
-        <div class="flex h-full w-72 flex-col justify-between border-l border-zinc-200 bg-white p-6 shadow-2xl">
-          <div>
-            <div class="mb-8 flex items-center justify-between">
-              <span class="flex items-center gap-2 text-sm font-semibold text-zinc-900">
-                <Sparkles class="h-4 w-4" />
-                GabutLab
-              </span>
-              <button
-                type="button"
-                @click="closeDrawer"
-                aria-label="Tutup menu"
-                class="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
-              >
-                <X class="h-5 w-5" />
-              </button>
-            </div>
+        @click="closeDrawer"
+        class="fixed inset-0 z-50 bg-zinc-900/40 backdrop-blur-xs md:hidden"
+      />
+    </Transition>
 
-            <nav class="flex flex-col gap-2 text-sm font-medium text-zinc-700">
-              <RouterLink
-                to="/"
-                @click="closeDrawer"
-                exact-active-class="bg-zinc-100 text-zinc-900"
-                class="rounded-xl px-3 py-2.5 transition-colors hover:bg-zinc-100"
-              >
-                Home
-              </RouterLink>
-              <RouterLink
-                to="/games"
-                @click="closeDrawer"
-                active-class="bg-zinc-100 text-zinc-900"
-                class="rounded-xl px-3 py-2.5 transition-colors hover:bg-zinc-100"
-              >
-                Game
-              </RouterLink>
-              <RouterLink
-                to="/tentang"
-                @click="closeDrawer"
-                active-class="bg-zinc-100 text-zinc-900"
-                class="rounded-xl px-3 py-2.5 transition-colors hover:bg-zinc-100"
-              >
-                Tentang
-              </RouterLink>
-            </nav>
+    <!-- Panel Drawer (slide halus dari kanan) -->
+    <Transition
+      enter-active-class="transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+      enter-from-class="translate-x-full"
+      enter-to-class="translate-x-0"
+      leave-active-class="transition-transform duration-200 ease-in"
+      leave-from-class="translate-x-0"
+      leave-to-class="translate-x-full"
+    >
+      <aside
+        v-if="mobileMenuOpen"
+        aria-label="Menu navigasi mobile"
+        class="fixed inset-y-0 right-0 z-50 flex w-72 flex-col justify-between border-l border-zinc-200 bg-white p-6 shadow-2xl will-change-transform md:hidden"
+      >
+        <div>
+          <div class="mb-8 flex items-center justify-between">
+            <span class="flex items-center gap-2 text-sm font-semibold text-zinc-900">
+              <Sparkles class="h-4 w-4" />
+              GabutLab
+            </span>
+            <button
+              type="button"
+              @click="closeDrawer"
+              aria-label="Tutup menu"
+              class="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
+            >
+              <X class="h-5 w-5" />
+            </button>
           </div>
 
-          <a
-            href="https://github.com/mochherucahyono"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 py-2.5 text-xs font-medium text-white hover:bg-zinc-800"
-          >
-            <Github class="h-4 w-4" />
-            <span>Buka Profil GitHub</span>
-          </a>
+          <nav class="flex flex-col gap-2 text-sm font-medium text-zinc-700">
+            <RouterLink
+              to="/"
+              @click="closeDrawer"
+              exact-active-class="bg-zinc-100 text-zinc-900"
+              class="rounded-xl px-3 py-2.5 transition-colors hover:bg-zinc-100"
+            >
+              Home
+            </RouterLink>
+            <RouterLink
+              to="/games"
+              @click="closeDrawer"
+              active-class="bg-zinc-100 text-zinc-900"
+              class="rounded-xl px-3 py-2.5 transition-colors hover:bg-zinc-100"
+            >
+              Game
+            </RouterLink>
+            <RouterLink
+              to="/tentang"
+              @click="closeDrawer"
+              active-class="bg-zinc-100 text-zinc-900"
+              class="rounded-xl px-3 py-2.5 transition-colors hover:bg-zinc-100"
+            >
+              Tentang
+            </RouterLink>
+          </nav>
         </div>
-      </div>
+
+        <a
+          href="https://github.com/mochherucahyono"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 py-2.5 text-xs font-medium text-white transition-colors hover:bg-zinc-800"
+        >
+          <Github class="h-4 w-4" />
+          <span>Buka Profil GitHub</span>
+        </a>
+      </aside>
     </Transition>
   </div>
 </template>
