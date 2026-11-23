@@ -2,6 +2,7 @@
 import { ref, watch, onMounted, onUnmounted } from 'vue';
 import { RouterLink, RouterView } from 'vue-router';
 import { Github, Sparkles, Menu, X, ArrowUpRight } from 'lucide-vue-next';
+import logo from '/gabut-lab.png'
 
 const mobileMenuOpen = ref(false);
 
@@ -41,13 +42,9 @@ onUnmounted(() => {
         <RouterLink
           to="/"
           @click="closeDrawer"
-          class="group inline-flex items-center gap-2.5 text-sm font-semibold tracking-tight text-zinc-900"
+          class="group inline-flex items-center text-sm font-semibold tracking-tight text-zinc-900"
         >
-          <span
-            class="flex h-8 w-8 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-900 text-white transition-transform duration-200 group-hover:scale-105"
-          >
-            <Sparkles class="h-4 w-4" />
-          </span>
+          <img :src="logo" alt="Logo GabutLab" class="h-8 w-8 rounded-xl object-contain"/>
           <span>GabutLab</span>
           <span class="hidden rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-medium text-zinc-500 sm:inline-block">
             v1.0
@@ -145,7 +142,7 @@ onUnmounted(() => {
         <div>
           <div class="mb-8 flex items-center justify-between">
             <span class="flex items-center gap-2 text-sm font-semibold text-zinc-900">
-              <Sparkles class="h-4 w-4" />
+              <img :src="logo" alt="" class="h-8 w-8 object-contain" />
               GabutLab
             </span>
             <button
