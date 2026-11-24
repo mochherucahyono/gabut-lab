@@ -3,7 +3,7 @@
 @layer base {
     html {
         scroll-behavior: smooth;
-        font-size: 115.5%;
+        font-size: 100%;
     }
     body {
         @apply bg-white text-zinc-900 antialiased;

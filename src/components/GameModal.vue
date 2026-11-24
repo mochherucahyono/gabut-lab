@@ -56,7 +56,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown));
         </span>
       </div>
 
-      <div class="mb-6 rounded-xl border border-zinc-100 bg-zinc-50 p-3.5 text-xs leading-relaxed text-zinc-600">
+      <div class="mb-6 rounded-xl bg-zinc-100/70 p-3.5 text-xs leading-relaxed text-zinc-600">
         <strong class="mb-1 block font-semibold text-zinc-900">Catatan di Balik Layar:</strong>
         {{ game.notes }}
       </div>

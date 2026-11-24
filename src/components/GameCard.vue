@@ -21,7 +21,7 @@ const handleImgError = () => {
 </script>
 
 <template>
-  <article class="group flex flex-col justify-between rounded-2xl border border-zinc-200 bg-white p-4 transition-all duration-200 hover:-translate-y-1 hover:border-zinc-300 hover:shadow-sm">
+  <article class="group flex flex-col justify-between rounded-2xl p-4 transition-all duration-200 hover:shadow-xl">
     <div>
       <!-- Thumbnail -->
       <div
@@ -43,7 +43,7 @@ const handleImgError = () => {
       <div class="mb-2.5 flex items-start justify-between gap-2">
         <h3
           @click="$emit('select', game)"
-          class="cursor-pointer text-lg font-semibold tracking-tight text-zinc-900 transition-colors group-hover:text-zinc-600"
+          class="line-clamp-2 cursor-pointer text-lg font-semibold tracking-tight text-zinc-900 transition-colors group-hover:text-zinc-600"
         >
           {{ game.title }}
         </h3>
@@ -63,7 +63,7 @@ const handleImgError = () => {
       </p>
 
       <!-- Tech Tags -->
-      <div class="mb-5 flex flex-wrap gap-1.5">
+      <div class="mb-4 flex flex-wrap gap-1.5 overflow-hidden">
         <span
           v-for="tag in game.tags"
           :key="tag"

@@ -9,7 +9,7 @@ const categoryCount = new Set(gamesList.map((game) => game.category)).size;
   <section class="mb-16">
     <div class="grid grid-cols-1 items-end gap-8 lg:grid-cols-12">
       <div class="lg:col-span-8">
-        <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-zinc-200/90 bg-zinc-50 px-3 py-1 text-xs font-medium text-zinc-600">
+        <div class="mb-4 inline-flex items-center gap-2 rounded-full bg-zinc-100/70 px-3 py-1 text-xs font-medium text-zinc-600">
           <span class="h-2 w-2 rounded-full bg-emerald-500" />
           <span>Ruang eksperimen terbuka</span>
         </div>
@@ -38,17 +38,17 @@ const categoryCount = new Set(gamesList.map((game) => game.category)).size;
       </div>
 
       <div class="grid grid-cols-3 gap-3 lg:col-span-4 lg:grid-cols-1">
-        <div class="rounded-2xl border border-zinc-200/80 bg-zinc-50/70 p-4">
+        <div class="rounded-2xl bg-zinc-100/70 p-4">
           <div class="text-2xl font-bold tracking-tight text-zinc-900">{{ gamesList.length }}</div>
-          <div class="mt-0.5 text-xs text-zinc-500">Karya & Eksperimen</div>
+          <div class="mt-0.5 text-xs text-zinc-900">Karya & Eksperimen</div>
         </div>
-        <div class="rounded-2xl border border-zinc-200/80 bg-zinc-50/70 p-4">
+        <div class="rounded-2xl bg-zinc-100/70 p-4">
           <div class="text-2xl font-bold tracking-tight text-zinc-900">{{ categoryCount }}</div>
-          <div class="mt-0.5 text-xs text-zinc-500">Kategori Genre</div>
+          <div class="mt-0.5 text-xs text-zinc-900">Kategori Genre</div>
         </div>
-        <div class="rounded-2xl border border-zinc-200/80 bg-zinc-50/70 p-4">
+        <div class="rounded-2xl bg-zinc-100/70 p-4">
           <div class="text-2xl font-bold tracking-tight text-zinc-900">100%</div>
-          <div class="mt-0.5 text-xs text-zinc-500">Demo & Kode Terbuka</div>
+          <div class="mt-0.5 text-xs text-zinc-900">Demo & Kode Terbuka</div>
         </div>
       </div>
     </div>

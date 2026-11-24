@@ -38,7 +38,7 @@ onUnmounted(() => {
 
     <!-- Sticky Navbar -->
     <header class="sticky top-0 z-30 border-b border-zinc-200/70 bg-white/80 backdrop-blur-xl">
-      <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3.5 sm:px-6">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 sm:px-6">
         <RouterLink
           to="/"
           @click="closeDrawer"
@@ -46,7 +46,7 @@ onUnmounted(() => {
         >
           <img :src="logo" alt="Logo GabutLab" class="h-8 w-8 rounded-xl object-contain"/>
           <span>GabutLab</span>
-          <span class="hidden rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-medium text-zinc-500 sm:inline-block">
+          <span class="hidden rounded-full ml-2 bg-zinc-100 px-2 py-0.5 text-[10px] font-medium text-zinc-500 sm:inline-block">
             v1.0
           </span>
         </RouterLink>
@@ -92,20 +92,20 @@ onUnmounted(() => {
           type="button"
           @click="mobileMenuOpen = true"
           aria-label="Buka menu navigasi"
-          class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-700 transition-colors hover:bg-zinc-50 md:hidden"
+          class="inline-flex h-9 w-9 items-center justify-center rounded-xl text-zinc-700 transition-colors hover:bg-zinc-100 md:hidden"
         >
-          <Menu class="h-4 w-4" />
+          <Menu class="h-5 w-5" />
         </button>
       </div>
     </header>
 
     <!-- Routed Page Content -->
-    <main class="mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:px-6 sm:py-14">
+    <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6 sm:py-14">
       <RouterView />
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-zinc-100 py-8 text-center text-xs text-zinc-500">
+    <footer class="py-8 text-center text-xs text-zinc-500">
       &copy; 2026 GabutLab. Dibuat oleh Heru Cahyono.
     </footer>
 

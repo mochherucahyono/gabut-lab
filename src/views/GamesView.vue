@@ -41,7 +41,7 @@ onUnmounted(() => {
 
 <template>
   <section>
-    <div class="mb-6 flex flex-col gap-4 border-b border-zinc-100 pb-5 sm:flex-row sm:items-center sm:justify-between">
+    <div class="mb-6 flex flex-col gap-4 pb-5 sm:flex-row sm:items-center sm:justify-between">
       <div class="flex flex-wrap items-center gap-1.5">
         <button
           v-for="category in categories"
@@ -79,7 +79,7 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <div v-if="filteredGames.length > 0" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div v-if="filteredGames.length > 0" class="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <GameCard
         v-for="game in filteredGames"
         :key="game.id"
