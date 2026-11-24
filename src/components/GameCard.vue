@@ -43,7 +43,7 @@ const handleImgError = () => {
       <div class="mb-2.5 flex items-start justify-between gap-2">
         <h3
           @click="$emit('select', game)"
-          class="line-clamp-2 cursor-pointer text-lg font-semibold tracking-tight text-zinc-900 transition-colors group-hover:text-zinc-600"
+          class="cursor-pointer text-lg font-semibold tracking-tight text-zinc-900 transition-colors group-hover:text-zinc-600"
         >
           {{ game.title }}
         </h3>
