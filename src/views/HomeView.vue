@@ -99,7 +99,7 @@ const triggerDoodle = () => {
     <!-- Tombol Aksi (Diperbesar) -->
     <div class="mb-10 flex flex-wrap items-center justify-center gap-4">
       <RouterLink
-        to="/games"
+        to="/game"
         class="inline-flex items-center gap-2.5 rounded-full bg-blue-600 px-7 py-3.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow-md active:scale-95 sm:text-base"
       >
         <Play class="h-4 w-4 fill-current sm:h-5 sm:w-5" />

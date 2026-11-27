@@ -3,6 +3,9 @@ import { ref, watch, onMounted, onUnmounted } from 'vue';
 import { RouterLink, RouterView } from 'vue-router';
 import { Github, Menu, X, ArrowUpRight, Sparkles } from 'lucide-vue-next';
 import logo from '/gabut-lab.png';
+import { useGameLibrary } from './composables/useGameLibrary.js';
+
+const { historyCount } = useGameLibrary();
 
 const mobileMenuOpen = ref(false);
 const logoError = ref(false);
@@ -86,11 +89,24 @@ onUnmounted(() => {
             Home
           </RouterLink>
           <RouterLink
-            to="/games"
+            to="/game"
             active-class="bg-blue-50 text-blue-700 ring-1 ring-blue-200/70"
             class="rounded-full px-4 py-2 text-sm font-semibold text-zinc-600 transition-all hover:bg-zinc-100/80 hover:text-zinc-900"
           >
             Game
+          </RouterLink>
+          <RouterLink
+            to="/riwayat"
+            active-class="bg-blue-50 text-blue-700 ring-1 ring-blue-200/70"
+            class="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-zinc-600 transition-all hover:bg-zinc-100/80 hover:text-zinc-900"
+          >
+            <span>Riwayat</span>
+            <span
+              v-if="historyCount > 0"
+              class="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-700"
+            >
+              {{ historyCount }}
+            </span>
           </RouterLink>
           <RouterLink
             to="/tentang"
@@ -119,9 +135,15 @@ onUnmounted(() => {
           type="button"
           @click="mobileMenuOpen = true"
           aria-label="Buka menu navigasi"
-          class="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-zinc-200/80 bg-white text-zinc-700 transition-colors hover:bg-zinc-100 md:hidden"
+          class="relative inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-zinc-200/80 bg-white text-zinc-700 transition-colors hover:bg-zinc-100 md:hidden"
         >
           <Menu class="h-5 w-5" />
+          <span
+            v-if="historyCount > 0"
+            class="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-emerald-500 px-1 text-[10px] font-bold text-white"
+          >
+            {{ historyCount }}
+          </span>
         </button>
       </div>
     </header>
@@ -216,12 +238,26 @@ onUnmounted(() => {
               Home
             </RouterLink>
             <RouterLink
-              to="/games"
+              to="/game"
               @click="closeDrawer"
               active-class="bg-blue-50 text-blue-700 ring-1 ring-blue-200/70"
               class="rounded-2xl px-4 py-3 transition-colors hover:bg-zinc-100"
             >
               Game
+            </RouterLink>
+            <RouterLink
+              to="/riwayat"
+              @click="closeDrawer"
+              active-class="bg-blue-50 text-blue-700 ring-1 ring-blue-200/70"
+              class="flex items-center justify-between rounded-2xl px-4 py-3 transition-colors hover:bg-zinc-100"
+            >
+              <span>Riwayat</span>
+              <span
+                v-if="historyCount > 0"
+                class="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-700"
+              >
+                {{ historyCount }}
+              </span>
             </RouterLink>
             <RouterLink
               to="/tentang"

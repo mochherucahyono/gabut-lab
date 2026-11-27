@@ -1,155 +1,286 @@
 <script setup>
-import { computed, ref, watch, onUnmounted } from 'vue';
-import { Search, X, Sparkles, RotateCcw } from 'lucide-vue-next';
+import { ref, computed, watch, onUnmounted } from 'vue';
+import { RouterLink } from 'vue-router';
+import { Search, X, Heart, History, Sparkles } from 'lucide-vue-next';
+import { gamesList } from '../data/games.js';
+import { useGameLibrary } from '../composables/useGameLibrary.js';
+import { isSafeExternalUrl } from '../utils/urlValidator.js';
 import GameCard from '../components/GameCard.vue';
 import GameModal from '../components/GameModal.vue';
-import { gamesList } from '../data/games.js';
+import GameEmbedModal from '../components/GameEmbedModal.vue';
 
+const { isFavorite, favoriteCount, historyCount, recordPlay } = useGameLibrary();
+
+const collectionTab = ref('all'); // 'all' | 'favorites'
 const selectedCategory = ref('Semua');
 const searchQuery = ref('');
 const activeGame = ref(null);
+const activeEmbedGame = ref(null);
 
-const categories = computed(() => ['Semua', ...new Set(gamesList.map((game) => game.category))]);
+const categories = computed(() => {
+  const uniqueCategories = new Set(gamesList.map((item) => item.category));
+  return ['Semua', ...Array.from(uniqueCategories)];
+});
 
 const filteredGames = computed(() => {
   const keyword = searchQuery.value.trim().toLowerCase();
 
   return gamesList.filter((game) => {
-    const matchesCategory = selectedCategory.value === 'Semua' || game.category === selectedCategory.value;
-    const matchesKeyword = !keyword ||
+    const matchesTab = collectionTab.value === 'all' || isFavorite(game.id);
+
+    const matchesCategory =
+      selectedCategory.value === 'Semua' || game.category === selectedCategory.value;
+
+    const matchesKeyword =
+      !keyword ||
       game.title.toLowerCase().includes(keyword) ||
       game.description.toLowerCase().includes(keyword) ||
       game.tags.some((tag) => tag.toLowerCase().includes(keyword));
 
-    return matchesCategory && matchesKeyword;
+    return matchesTab && matchesCategory && matchesKeyword;
   });
 });
 
+const isEmptyFavoritesOnly = computed(
+  () =>
+    collectionTab.value === 'favorites' &&
+    favoriteCount.value === 0 &&
+    selectedCategory.value === 'Semua' &&
+    !searchQuery.value.trim()
+);
+
 const resetFilters = () => {
+  collectionTab.value = 'all';
   selectedCategory.value = 'Semua';
   searchQuery.value = '';
 };
 
-watch(activeGame, (game) => {
-  document.body.style.overflow = game ? 'hidden' : '';
+const openDetailModal = (game) => {
+  activeEmbedGame.value = null;
+  activeGame.value = game;
+};
+
+const closeDetailModal = () => {
+  activeGame.value = null;
+};
+
+const openEmbedModal = (game) => {
+  if (!game || !isSafeExternalUrl(game.demoUrl)) return;
+  activeGame.value = null;
+  activeEmbedGame.value = game;
+  recordPlay(game);
+};
+
+const closeEmbedModal = () => {
+  activeEmbedGame.value = null;
+};
+
+watch([activeGame, activeEmbedGame], ([detailModal, embedModal]) => {
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = detailModal || embedModal ? 'hidden' : '';
+  }
 });
 
 onUnmounted(() => {
-  document.body.style.overflow = '';
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = '';
+  }
 });
 </script>
 
 <template>
-  <section class="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
-    <!-- Header Ringkas Bergaya Doodle -->
-    <div class="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+  <div class="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
+    <!-- Header Section -->
+    <section class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <div class="mb-2 inline-flex items-center gap-2 rounded-full border border-zinc-200/80 bg-white px-3.5 py-1 text-xs font-medium text-zinc-600 shadow-2xs">
-          <Sparkles class="h-3.5 w-3.5 text-amber-500" />
-          <span>Koleksi gabut.lab</span>
-        </div>
-        <h2 class="text-2xl font-bold tracking-tight text-zinc-900 sm:text-4xl">
-          Eksplorasi
-          <span class="relative inline-block">
-            Mini-Game & Karya
-            <span class="absolute -bottom-1 left-0 h-1.5 w-full rounded-full bg-blue-200/90" />
+        <div
+          class="mb-2.5 inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-medium text-zinc-600"
+        >
+          <span class="flex items-center gap-1">
+            <span class="h-2 w-2 rounded-full bg-blue-500" />
+            <span class="h-2 w-2 rounded-full bg-rose-500" />
+            <span class="h-2 w-2 rounded-full bg-amber-400" />
+            <span class="h-2 w-2 rounded-full bg-emerald-500" />
           </span>
-        </h2>
+          <span>Katalog Eksperimen</span>
+        </div>
+        <h1 class="text-3xl font-bold tracking-tight text-zinc-900 sm:text-5xl lg:text-6xl">
+          Koleksi Mini-Game
+        </h1>
+        <p class="mt-1 text-base leading-relaxed text-zinc-600 sm:text-lg lg:text-xl">
+          Mainkan game langsung di layar embed atau buka di tab baru, simpan favoritmu, dan lihat riwayat bermain.
+        </p>
       </div>
 
-      <div class="inline-flex items-center gap-2 self-start rounded-full border border-zinc-200/80 bg-white px-4 py-2 text-xs font-medium text-zinc-600 shadow-2xs sm:self-auto sm:text-sm">
-        <span class="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-        <span>Menampilkan <strong class="font-bold text-zinc-900">{{ filteredGames.length }}</strong> dari {{ gamesList.length }} karya</span>
-      </div>
-    </div>
+      <!-- Quick Link ke Riwayat -->
+      <RouterLink
+        to="/riwayat"
+        class="inline-flex items-center gap-2 self-start rounded-full border border-zinc-200 bg-white px-4 py-2 text-xs font-medium text-zinc-700 shadow-2xs transition-all hover:border-emerald-300 hover:bg-emerald-50/50 hover:text-emerald-700 sm:self-auto"
+      >
+        <History class="h-3.5 w-3.5 text-emerald-600" />
+        <span>Riwayat</span>
+        <span
+          v-if="historyCount > 0"
+          class="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700"
+        >
+          {{ historyCount }}
+        </span>
+      </RouterLink>
+    </section>
 
-    <!-- Bar Filter Kategori & Pencarian (Lebih Besar & Lega) -->
-    <div class="mb-9 flex flex-col gap-4 rounded-3xl border border-zinc-200/80 bg-white p-3.5 shadow-[0_4px_24px_-10px_rgba(0,0,0,0.07)] lg:flex-row lg:items-center lg:justify-between lg:rounded-full lg:px-4 lg:py-3">
-      <!-- Pill Kategori -->
-      <div class="flex flex-wrap items-center gap-2">
+    <!-- Toolbar: Semua / Favorit + Kategori + Pencarian -->
+    <section class="mb-8 space-y-4 rounded-3xl border border-zinc-200/80 bg-zinc-50/60 p-4 sm:p-5">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <!-- Segmented Switch: Semua / Favorit -->
+        <div
+          role="tablist"
+          aria-label="Filter koleksi game"
+          class="inline-flex rounded-full border border-zinc-200 bg-white p-1"
+        >
+          <button
+            type="button"
+            role="tab"
+            :aria-selected="collectionTab === 'all'"
+            @click="collectionTab = 'all'"
+            :class="[
+              'inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-medium transition-all',
+              collectionTab === 'all'
+                ? 'bg-blue-600 text-white shadow-2xs'
+                : 'text-zinc-600 hover:text-zinc-900'
+            ]"
+          >
+            <Sparkles class="h-3.5 w-3.5" />
+            <span>Semua ({{ gamesList.length }})</span>
+          </button>
+
+          <button
+            type="button"
+            role="tab"
+            :aria-selected="collectionTab === 'favorites'"
+            @click="collectionTab = 'favorites'"
+            :class="[
+              'inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-medium transition-all',
+              collectionTab === 'favorites'
+                ? 'bg-rose-500 text-white shadow-2xs'
+                : 'text-zinc-600 hover:text-zinc-900'
+            ]"
+          >
+            <Heart :class="['h-3.5 w-3.5', collectionTab === 'favorites' ? 'fill-current' : '']" />
+            <span>Favorit ({{ favoriteCount }})</span>
+          </button>
+        </div>
+
+        <!-- Search Box -->
+        <div class="relative w-full sm:w-72">
+          <Search
+            class="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400"
+          />
+          <input
+            v-model="searchQuery"
+            type="text"
+            aria-label="Cari judul, deskripsi, atau stack"
+            placeholder="Cari judul, deskripsi, atau stack..."
+            class="w-full rounded-full border border-zinc-200 bg-white py-2 pl-9 pr-8 text-xs text-zinc-900 placeholder:text-zinc-400 transition-colors focus:border-blue-400 focus:outline-none"
+          />
+          <button
+            v-if="searchQuery"
+            type="button"
+            @click="searchQuery = ''"
+            aria-label="Hapus pencarian"
+            class="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
+          >
+            <X class="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Category Pills -->
+      <div class="flex flex-wrap items-center gap-1.5 pt-1">
         <button
           v-for="category in categories"
           :key="category"
           type="button"
           @click="selectedCategory = category"
           :class="[
-            'rounded-full px-4 py-2 text-xs font-semibold transition-all active:scale-95 sm:text-sm',
+            'rounded-full px-3.5 py-1.5 text-xs font-medium transition-all',
             selectedCategory === category
-              ? 'bg-blue-600 text-white shadow-xs'
-              : 'bg-zinc-100/90 text-zinc-600 hover:bg-zinc-200/75 hover:text-zinc-900'
+              ? 'bg-zinc-900 text-white shadow-2xs'
+              : 'border border-zinc-200/80 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-900'
           ]"
         >
           {{ category }}
         </button>
       </div>
+    </section>
 
-      <!-- Search Input Bergaya Google Search -->
-      <div class="relative w-full lg:w-80">
-        <Search class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-        <input
-          v-model="searchQuery"
-          type="text"
-          placeholder="Cari judul, deskripsi, atau stack..."
-          class="w-full rounded-full border border-zinc-200 bg-zinc-50/70 py-2.5 pl-10 pr-9 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
-        />
-        <button
-          v-if="searchQuery"
-          type="button"
-          @click="searchQuery = ''"
-          aria-label="Hapus pencarian"
-          class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-zinc-400 transition-colors hover:bg-zinc-200/70 hover:text-zinc-700"
-        >
-          <X class="h-4 w-4" />
-        </button>
-      </div>
-    </div>
-
-    <!-- Grid Kartu Game -->
-    <div v-if="filteredGames.length > 0" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <!-- Game Grid -->
+    <section
+      v-if="filteredGames.length > 0"
+      class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+    >
       <GameCard
         v-for="game in filteredGames"
         :key="game.id"
         :game="game"
-        @select="activeGame = $event"
+        @select="openDetailModal"
+        @play="openEmbedModal"
       />
-    </div>
+    </section>
 
-    <!-- Empty State Bergaya Doodle -->
-    <div
-      v-else
-      class="relative overflow-hidden rounded-[2rem] border border-zinc-200/80 bg-white px-6 py-16 text-center shadow-[0_6px_30px_-10px_rgba(0,0,0,0.07)]"
+    <!-- Empty State: Belum Ada Favorit -->
+    <section
+      v-else-if="isEmptyFavoritesOnly"
+      class="rounded-3xl border border-dashed border-rose-200 bg-rose-50/40 px-6 py-16 text-center"
     >
-      <div class="pointer-events-none absolute -left-5 top-6 h-16 w-16 rounded-full bg-amber-100/80" />
-      <div class="pointer-events-none absolute right-8 bottom-6 h-16 w-16 rounded-2xl bg-rose-100/75" />
-
-      <div class="relative z-10 mx-auto max-w-md">
-        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-500 ring-1 ring-amber-200/70">
-          <Search class="h-7 w-7" />
-        </div>
-        <p class="mb-1.5 text-lg font-bold text-zinc-900 sm:text-xl">Tidak ada karya yang cocok</p>
-        <p class="mb-6 text-sm leading-relaxed text-zinc-600 sm:text-base">
-          Coba kata kunci lain atau kembalikan filter kategori ke <strong class="font-semibold text-zinc-800">Semua</strong>.
-        </p>
-        <button
-          type="button"
-          @click="resetFilters"
-          class="inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-medium text-white shadow-xs transition-all hover:bg-blue-700 active:scale-95"
-        >
-          <RotateCcw class="h-4 w-4" />
-          <span>Reset Filter</span>
-        </button>
+      <div
+        class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-rose-200 bg-white text-rose-500 shadow-2xs"
+      >
+        <Heart class="h-5 w-5" />
       </div>
-    </div>
+      <h2 class="mb-1 text-base font-semibold text-zinc-900">Belum ada game favorit</h2>
+      <p class="mx-auto mb-5 max-w-md text-xs leading-relaxed text-zinc-600">
+        Klik ikon hati pada kartu atau detail game yang kamu suka untuk menyimpannya di daftar favoritmu.
+      </p>
+      <button
+        type="button"
+        @click="collectionTab = 'all'"
+        class="rounded-full bg-blue-600 px-5 py-2 text-xs font-medium text-white transition-colors hover:bg-blue-700"
+      >
+        Lihat Semua Game
+      </button>
+    </section>
 
-    <Transition
-      enter-active-class="transition duration-200 ease-out"
-      enter-from-class="opacity-0 scale-95"
-      enter-to-class="opacity-100 scale-100"
-      leave-active-class="transition duration-150 ease-in"
-      leave-from-class="opacity-100 scale-100"
-      leave-to-class="opacity-0 scale-95"
+    <!-- Empty State: Filter / Pencarian Kosong -->
+    <section
+      v-else
+      class="rounded-3xl border border-dashed border-zinc-200 bg-zinc-50/60 px-6 py-16 text-center"
     >
-      <GameModal v-if="activeGame" :game="activeGame" @close="activeGame = null" />
-    </Transition>
-  </section>
+      <h2 class="mb-1 text-base font-semibold text-zinc-900">Tidak ada game yang cocok</h2>
+      <p class="mb-5 text-xs text-zinc-500">
+        Coba ubah kata kunci pencarian, kategori, atau kembali ke daftar semua game.
+      </p>
+      <button
+        type="button"
+        @click="resetFilters"
+        class="rounded-full bg-zinc-900 px-5 py-2 text-xs font-medium text-white transition-colors hover:bg-zinc-800"
+      >
+        Reset Filter
+      </button>
+    </section>
+
+    <!-- Detail Modal -->
+    <GameModal
+      v-if="activeGame"
+      :game="activeGame"
+      @close="closeDetailModal"
+      @play="openEmbedModal"
+    />
+
+    <!-- Embed Modal -->
+    <GameEmbedModal
+      v-if="activeEmbedGame"
+      :game="activeEmbedGame"
+      @close="closeEmbedModal"
+    />
+  </div>
 </template>

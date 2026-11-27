@@ -1,6 +1,8 @@
 <script setup>
-import { ref, watch } from 'vue';
-import { Play, Github, Info } from 'lucide-vue-next';
+import { ref, watch, computed } from 'vue';
+import { Play, Github, Info, Heart } from 'lucide-vue-next';
+import { useGameLibrary } from '../composables/useGameLibrary.js';
+import { isSafeExternalUrl } from '../utils/urlValidator.js';
 
 const props = defineProps({
   game: {
@@ -9,10 +11,16 @@ const props = defineProps({
   }
 });
 
-defineEmits(['select']);
+const emit = defineEmits(['select', 'play']);
+
+const { isFavorite, toggleFavorite } = useGameLibrary();
 
 const imgSrc = ref(props.game?.thumbnail || '');
 const hasError = ref(false);
+
+const favorited = computed(() => isFavorite(props.game?.id));
+const hasValidDemo = computed(() => isSafeExternalUrl(props.game?.demoUrl));
+const hasValidRepo = computed(() => isSafeExternalUrl(props.game?.repoUrl));
 
 watch(
   () => props.game?.thumbnail,
@@ -32,6 +40,18 @@ const handleImgError = () => {
   }
   hasError.value = true;
 };
+
+const handleToggleFavorite = () => {
+  if (props.game?.id !== undefined) {
+    toggleFavorite(props.game.id);
+  }
+};
+
+const handlePlayClick = () => {
+  if (props.game && hasValidDemo.value) {
+    emit('play', props.game);
+  }
+};
 </script>
 
 <template>
@@ -41,19 +61,20 @@ const handleImgError = () => {
     <div>
       <!-- Thumbnail -->
       <div
-        @click="$emit('select', game)"
-        class="relative mb-5 aspect-video w-full cursor-pointer overflow-hidden rounded-2xl border border-zinc-100 bg-zinc-100"
+        class="relative mb-5 aspect-video w-full overflow-hidden rounded-2xl border border-zinc-100 bg-zinc-100"
       >
         <img
           v-if="imgSrc && !hasError"
           :src="imgSrc"
           :alt="game?.title || 'Preview karya'"
+          @click="$emit('select', game)"
           @error="handleImgError"
-          class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          class="h-full w-full cursor-pointer object-cover transition-transform duration-300 group-hover:scale-105"
         />
         <div
           v-else
-          class="flex h-full w-full flex-col items-center justify-center gap-2 bg-amber-50/70 px-4 text-center"
+          @click="$emit('select', game)"
+          class="flex h-full w-full cursor-pointer flex-col items-center justify-center gap-2 bg-amber-50/70 px-4 text-center"
         >
           <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-zinc-700 ring-1 ring-zinc-200/80">
             gabut.lab
@@ -63,9 +84,31 @@ const handleImgError = () => {
           </span>
         </div>
 
+        <!-- Tombol Favorit -->
+        <button
+          type="button"
+          @click.stop="handleToggleFavorite"
+          :aria-label="
+            favorited
+              ? `Hapus ${game?.title || 'game'} dari favorit`
+              : `Tambahkan ${game?.title || 'game'} ke favorit`
+          "
+          :aria-pressed="favorited"
+          :title="favorited ? 'Hapus dari favorit' : 'Simpan ke favorit'"
+          :class="[
+            'absolute left-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full border shadow-2xs backdrop-blur-xs transition-all duration-200 active:scale-90',
+            favorited
+              ? 'border-rose-200 bg-rose-50/95 text-rose-500 hover:bg-rose-100'
+              : 'border-zinc-200/90 bg-white/95 text-zinc-500 hover:border-rose-200 hover:text-rose-500'
+          ]"
+        >
+          <Heart :class="['h-4 w-4 transition-transform', favorited ? 'scale-110 fill-current' : '']" />
+        </button>
+
+        <!-- Badge Kategori -->
         <span
           v-if="game?.category"
-          class="absolute right-3 top-3 rounded-full border border-zinc-200/90 bg-white/95 px-3 py-1 text-xs font-semibold text-zinc-700 shadow-2xs backdrop-blur-xs"
+          class="pointer-events-none absolute right-3 top-3 rounded-full border border-zinc-200/90 bg-white/95 px-3 py-1 text-xs font-semibold text-zinc-700 shadow-2xs backdrop-blur-xs"
         >
           {{ game.category }}
         </span>
@@ -109,16 +152,16 @@ const handleImgError = () => {
 
     <!-- Aksi Demo & Kode -->
     <div class="grid grid-cols-2 gap-3 border-t border-zinc-100 pt-4">
-      <a
-        v-if="game?.demoUrl"
-        :href="game.demoUrl"
-        target="_blank"
-        rel="noopener noreferrer"
+      <button
+        v-if="hasValidDemo"
+        type="button"
+        @click="handlePlayClick"
+        :aria-label="`Mainkan embed ${game?.title || 'game'}`"
         class="inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white shadow-2xs transition-all hover:bg-blue-700 active:scale-95 sm:text-sm"
       >
         <Play class="h-4 w-4 fill-current" />
         <span>Mainkan</span>
-      </a>
+      </button>
       <span
         v-else
         class="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-full bg-zinc-100 px-4 py-2.5 text-xs font-medium text-zinc-400 sm:text-sm"
@@ -128,10 +171,11 @@ const handleImgError = () => {
       </span>
 
       <a
-        v-if="game?.repoUrl"
+        v-if="hasValidRepo"
         :href="game.repoUrl"
         target="_blank"
         rel="noopener noreferrer"
+        :aria-label="`Lihat kode sumber ${game?.title || 'game'} di GitHub`"
         class="inline-flex items-center justify-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-xs font-semibold text-zinc-700 transition-all hover:border-zinc-300 hover:bg-zinc-50 active:scale-95 sm:text-sm"
       >
         <Github class="h-4 w-4" />

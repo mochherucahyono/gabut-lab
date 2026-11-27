@@ -1,15 +1,35 @@
 <script setup>
-import { onMounted, onUnmounted } from 'vue';
-import { X, Play, Github, Sparkles } from 'lucide-vue-next';
+import { computed, onMounted, onUnmounted } from 'vue';
+import { X, Play, Github, Sparkles, Heart } from 'lucide-vue-next';
+import { useGameLibrary } from '../composables/useGameLibrary.js';
+import { isSafeExternalUrl } from '../utils/urlValidator.js';
 
-defineProps({
+const props = defineProps({
   game: {
     type: Object,
     required: true
   }
 });
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'play']);
+
+const { isFavorite, toggleFavorite } = useGameLibrary();
+
+const favorited = computed(() => isFavorite(props.game?.id));
+const hasValidDemo = computed(() => isSafeExternalUrl(props.game?.demoUrl));
+const hasValidRepo = computed(() => isSafeExternalUrl(props.game?.repoUrl));
+
+const handleToggleFavorite = () => {
+  if (props.game?.id !== undefined) {
+    toggleFavorite(props.game.id);
+  }
+};
+
+const handlePlayClick = () => {
+  if (props.game && hasValidDemo.value) {
+    emit('play', props.game);
+  }
+};
 
 const handleKeydown = (e) => {
   if (e.key === 'Escape') emit('close');
@@ -24,6 +44,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown));
     @click.self="emit('close')"
     role="dialog"
     aria-modal="true"
+    :aria-labelledby="`modal-title-${game?.id}`"
     class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/45 p-4 backdrop-blur-xs sm:p-6"
   >
     <div class="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-zinc-200/90 bg-white p-6 shadow-2xl sm:p-8">
@@ -46,17 +67,39 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown));
             </span>
           </div>
 
-          <button
-            type="button"
-            @click="emit('close')"
-            aria-label="Tutup modal"
-            class="rounded-full border border-zinc-200/80 bg-zinc-50 p-2 text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
-          >
-            <X class="h-5 w-5" />
-          </button>
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              @click="handleToggleFavorite"
+              :aria-label="
+                favorited
+                  ? `Hapus ${game?.title || 'game'} dari favorit`
+                  : `Tambahkan ${game?.title || 'game'} ke favorit`
+              "
+              :aria-pressed="favorited"
+              :class="[
+                'inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all active:scale-95',
+                favorited
+                  ? 'border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100'
+                  : 'border-zinc-200/80 bg-zinc-50 text-zinc-600 hover:border-rose-200 hover:bg-rose-50/60 hover:text-rose-600'
+              ]"
+            >
+              <Heart :class="['h-3.5 w-3.5', favorited ? 'fill-current' : '']" />
+              <span>{{ favorited ? 'Difavoritkan' : 'Favorit' }}</span>
+            </button>
+
+            <button
+              type="button"
+              @click="emit('close')"
+              aria-label="Tutup modal"
+              class="rounded-full border border-zinc-200/80 bg-zinc-50 p-2 text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
+            >
+              <X class="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
-        <h3 class="mb-2.5 text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">
+        <h3 :id="`modal-title-${game?.id}`" class="mb-2.5 text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">
           {{ game?.title || 'Tanpa Judul' }}
         </h3>
 
@@ -80,19 +123,26 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown));
         </div>
 
         <div class="flex flex-col gap-3 sm:flex-row">
-          <a
-            v-if="game?.demoUrl"
-            :href="game.demoUrl"
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            v-if="hasValidDemo"
+            type="button"
+            @click="handlePlayClick"
+            :aria-label="`Mainkan embed ${game?.title || 'game'}`"
             class="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-xs transition-all hover:bg-blue-700 active:scale-95"
           >
             <Play class="h-4 w-4 fill-current" />
             <span>Mainkan</span>
-          </a>
+          </button>
+          <span
+            v-else
+            class="inline-flex flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-full bg-zinc-100 px-5 py-3 text-sm font-medium text-zinc-400"
+          >
+            <Play class="h-4 w-4" />
+            <span>Mainkan</span>
+          </span>
 
           <a
-            v-if="game?.repoUrl"
+            v-if="hasValidRepo"
             :href="game.repoUrl"
             target="_blank"
             rel="noopener noreferrer"
